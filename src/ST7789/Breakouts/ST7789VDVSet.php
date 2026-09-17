@@ -2,8 +2,8 @@
 
 namespace DeptOfScrapyardRobotics\Displays\ST77xx\ST7789\Breakouts;
 
-use GeneralPurposeIO\Circuits\DataRegister;
-use DeptOfScrapyardRobotics\Displays\ST77xx\ST7789\ST7789Exception;
+use GeneralPurposeIO\IntegratedCircuits\DataRegister;
+use DeptOfScrapyardRobotics\Displays\ST77xx\ST77xxException;
 
 /**
  * VDVS (0xC4) — VDV set, single parameter byte.
@@ -15,7 +15,7 @@ readonly class ST7789VDVSet extends DataRegister
         public int $vdvs = 0x20,
     ) {
         if (($this->vdvs < 0) || ($this->vdvs > 0x3F)) {
-            throw ST7789Exception::invalidRegisterValue('vdvs', $this->vdvs, 0, 0x3F);
+            throw ST77xxException::invalidRegisterValue('vdvs', $this->vdvs, 0, 0x3F);
         }
     }
 

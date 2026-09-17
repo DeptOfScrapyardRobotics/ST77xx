@@ -2,7 +2,7 @@
 
 namespace DeptOfScrapyardRobotics\Displays\ST77xx;
 
-use GeneralPurposeIO\Contracts\Circuits\CircuitException;
+use GeneralPurposeIO\Contracts\IntegratedCircuits\CircuitException;
 
 class ST77xxException extends CircuitException
 {
@@ -24,5 +24,15 @@ class ST77xxException extends CircuitException
     public static function spiWriteFailed(string $kind, int $context): static
     {
         return new static("ST77xx SPI {$kind} write failed or wrote fewer bytes than expected (context: {$context}). Check wiring, SPI bus permissions, and that the device is powered.");
+    }
+
+    public static function invalidProperty(string $name, string $class): static
+    {
+        return new static("Invalid property '{$name}' on {$class}.");
+    }
+
+    public static function invalidColorMode(int $bits): static
+    {
+        return new static("Invalid color mode: {$bits}");
     }
 }

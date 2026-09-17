@@ -2,7 +2,7 @@
 
 namespace DeptOfScrapyardRobotics\Displays\ST77xx\ST7735\Breakouts;
 
-use GeneralPurposeIO\Circuits\DataRegister;
+use GeneralPurposeIO\IntegratedCircuits\DataRegister;
 use DeptOfScrapyardRobotics\Displays\ST77xx\ST7735\Enums\ST7735VCOMVoltage;
 
 readonly class ST7735VCOMControl1 extends DataRegister

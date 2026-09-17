@@ -1,11 +1,6 @@
-# Directory Update Log
+# dept-of-scrapyard-robotics/st77xx Update Log
 
-## 2026-08-11
-
-* **Fix (draft)**: Composer `require` uses leaf components (`gpio/*`, `waveforms/contracts` or `tubes/contracts`, `fabricate/nuts-and-bolts`) — no `scrapyard-io/gpio-framework` / `scrapyard-io/waveforms` / `scrapyard-io/tubes` kitchen sinks. Amended [package](orientation/package.md).
-
-## 2026-08-10
-
-* **Fix**: `ST77xxIO::spiData` / `data()` accept `array|string` — `PanelIC::transmit` passes `DumpedBuffer::raw_data` binary strings; chunk via `substr` (no unpack-to-int-array).
-* **Update (draft)**: [Display panels](core/display-panels.md) — ST7735/ST7789/ST7796 implement tubes `Contracts\Panels\FullColorDisplay` for PanelIC wrap.
-* **Creation**: Initial `.okf` v0.2 for `dept-of-scrapyard-robotics/st77xx` 0.7 — package orientation, exemplar role, DisplayPanel/Pinout/`spi()` core, provider catalog + make-profile + fills/smoke, USB SPI digital-share and smoke-not-tubes traps. Style matched to `scrapyard-io/gpio-framework/.okf`; registry semantics deferred to gpio-framework.
+## 2026-09-16
+* **Update**: [drawing](/drawing.md), [overview](/overview.md) — `fillRgb565()` replaced by mode-neutral `fill(r, g, b)` packed from the current FormatSpec; colour mode switching documented.
+* **Removal**: traps/fill-is-rgb565 (fill no longer depth-bound); unused `ST77xxCatalogIc`, `ST77xxConsoleCommand`, `ST77xxSmokeColor` enums.
+* **Creation**: bundle seeded for 0.8.0 — [overview](/overview.md), [connecting](/connecting.md), [controllers](/controllers.md), [drawing](/drawing.md), [settings](/settings.md), [wiring-config](/wiring-config.md), four [traps](/traps/index.md).

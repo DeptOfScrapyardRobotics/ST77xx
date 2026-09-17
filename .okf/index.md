@@ -2,34 +2,25 @@
 okf_version: "0.2"
 ---
 
-# dept-of-scrapyard-robotics/st77xx Knowledge Bundle
+# dept-of-scrapyard-robotics/st77xx — knowledge bundle
 
-Package knowledge for `dept-of-scrapyard-robotics/st77xx` (ST7735 / ST7789 / ST7796, v0.7.x).
-Read this index first; open only the concepts needed for the task.
+ST7735, ST7789 and ST7796 colour TFT drivers for `scrapyard-io/framework` 0.8. SPI + DC/RST, datasheet boot from per-chip configuration objects, row-major `FormatSpec`, windowed RAM writes, fill in any colour mode.
 
-**Trust rule:** Prefer `status: stable`. Treat `deprecated` as historical only. New agent-written concepts stay `status: draft` until a human verifies them.
-**Placement:** Package-root `.okf/` only — never under `src/` IC subtrees.
-**Links:** Concept cross-links use paths relative to each file.
-**Scope:** This package owns chip drivers + catalog registration for ST77xx panels. CircuitRegistry / fluent / profile **semantics** live in `scrapyard-io/gpio-framework` `.okf` — point there; do not restate the registry model here.
-**Dist note:** `.okf/` and root `AGENTS.md` are `export-ignore` in `.gitattributes`.
+Read this index first, open only concepts task needs. Every concept `status: draft` until human verifies.
 
-# Orientation
+# Concepts
 
-* [Package (0.7)](orientation/package.md) - Composer identity, requires, discovery.
-* [Exemplar IC package](orientation/exemplar.md) - DOSR Circuits 0.7 promotion pattern.
-
-# Core
-
-* [Display panels](core/display-panels.md) - ST7735/ST7789/ST7796 extend DisplayPanel; Pinout SPI+DigitalIO; `spi()` factory.
-* [Provider and catalog](core/provider-catalog.md) - ST77xxServiceProvider registers slugs + profile makers + smoke sketch.
-* [Make profile](core/make-profile.md) - `st77xx:make-profile` and `circuit:make-profile` delegation.
-* [Fills and smoke](core/fills-and-smoke.md) - `ST77xxFillsRgb565` + `st77xx-smoke` sketch.
+* [overview.md](/overview.md) - package identity, requires, class shape shared by the three chips, errors
+* [connecting.md](/connecting.md) - ST77xxSPITransport, DC/RST, FT232H and spidev wiring
+* [controllers.md](/controllers.md) - per-chip boot sequence, configuration fields, defaults
+* [drawing.md](/drawing.md) - FormatSpec, packing, transmit() windows, offsets, mode-neutral fill(), colour-mode switching, timings
+* [settings.md](/settings.md) - properties, setters, state in configuration, orientation
+* [wiring-config.md](/wiring-config.md) - circuits.st77xx keys, publish tag
 
 # Traps
 
-* [USB SPI digital share](traps/usb-spi-digital-share.md) - Separate DigitalIO only when `canServeDigitalPins()` is false.
-* [Smoke is not tubes](traps/smoke-not-tubes.md) - Smoke provisions via `Circuit::profile()` only; no window/UX path.
+* [traps/](/traps/index.md) - MPSSE speed via clockRate, MADCTL swaps width/height, unchecked writes
 
 # Log
 
-* [Directory update log](log.md)
+* [log.md](/log.md)

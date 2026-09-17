@@ -2,8 +2,8 @@
 
 namespace DeptOfScrapyardRobotics\Displays\ST77xx\ST7789\Breakouts;
 
-use GeneralPurposeIO\Circuits\DataRegister;
-use DeptOfScrapyardRobotics\Displays\ST77xx\ST7789\ST7789Exception;
+use GeneralPurposeIO\IntegratedCircuits\DataRegister;
+use DeptOfScrapyardRobotics\Displays\ST77xx\ST77xxException;
 
 /**
  * VRHS (0xC3) — VRH set, single parameter byte.
@@ -15,7 +15,7 @@ readonly class ST7789VRHSet extends DataRegister
         public int $vrhs = 0x12,
     ) {
         if (($this->vrhs < 0) || ($this->vrhs > 0x3F)) {
-            throw ST7789Exception::invalidRegisterValue('vrhs', $this->vrhs, 0, 0x3F);
+            throw ST77xxException::invalidRegisterValue('vrhs', $this->vrhs, 0, 0x3F);
         }
     }
 

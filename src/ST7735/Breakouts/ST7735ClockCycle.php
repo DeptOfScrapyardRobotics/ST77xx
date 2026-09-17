@@ -2,19 +2,19 @@
 
 namespace DeptOfScrapyardRobotics\Displays\ST77xx\ST7735\Breakouts;
 
-use GeneralPurposeIO\Circuits\DataRegister;
-use DeptOfScrapyardRobotics\Displays\ST77xx\ST7735\ST7735Exception;
+use GeneralPurposeIO\IntegratedCircuits\DataRegister;
+use DeptOfScrapyardRobotics\Displays\ST77xx\ST77xxException;
 
 readonly class ST7735ClockCycle extends DataRegister
 {
     /**
-     * @throws ST7735Exception
+     * @throws ST77xxException
      */
     public function __construct(
         public int $osc_clock_cycles_per_line = 0x02
     ) {
         if (($this->osc_clock_cycles_per_line < 0) || ($this->osc_clock_cycles_per_line > 15)) {
-            throw ST7735Exception::invalidClockCycles($this->osc_clock_cycles_per_line);
+            throw ST77xxException::invalidRegisterValue('osc_clock_cycles_per_line', $this->osc_clock_cycles_per_line, 0, 15);
         }
     }
 
@@ -28,7 +28,7 @@ readonly class ST7735ClockCycle extends DataRegister
     }
 
     /**
-     * @throws ST7735Exception
+     * @throws ST77xxException
      */
     public static function fromByte(int $byte): static
     {
@@ -36,7 +36,7 @@ readonly class ST7735ClockCycle extends DataRegister
     }
 
     /**
-     * @throws ST7735Exception
+     * @throws ST77xxException
      */
     public static function none(): static
     {

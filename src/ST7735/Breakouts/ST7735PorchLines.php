@@ -2,8 +2,8 @@
 
 namespace DeptOfScrapyardRobotics\Displays\ST77xx\ST7735\Breakouts;
 
-use GeneralPurposeIO\Circuits\DataRegister;
-use DeptOfScrapyardRobotics\Displays\ST77xx\ST7735\ST7735Exception;
+use GeneralPurposeIO\IntegratedCircuits\DataRegister;
+use DeptOfScrapyardRobotics\Displays\ST77xx\ST77xxException;
 
 readonly class ST7735PorchLines extends DataRegister
 {
@@ -11,7 +11,7 @@ readonly class ST7735PorchLines extends DataRegister
         public int $blank_lines_to_insert = 0x2C
     ) {
         if (($this->blank_lines_to_insert < 0) || ($this->blank_lines_to_insert > 63)) {
-            throw ST7735Exception::invalidBlankLinesToInsert($this->blank_lines_to_insert);
+            throw ST77xxException::invalidRegisterValue('blank_lines_to_insert', $this->blank_lines_to_insert, 0, 63);
         }
     }
 

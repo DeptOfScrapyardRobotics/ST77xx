@@ -2,7 +2,7 @@
 
 namespace DeptOfScrapyardRobotics\Displays\ST77xx\ST7789\Breakouts;
 
-use DeptOfScrapyardRobotics\Displays\ST77xx\ST7789\ST7789Exception;
+use DeptOfScrapyardRobotics\Displays\ST77xx\ST77xxException;
 
 /**
  * PORCTRL (0xB2) — porch setting.
@@ -36,14 +36,14 @@ readonly class ST7789PorchControl
     private function assertSevenBit(int $value, string $field): void
     {
         if (($value < 0) || ($value > 0x7F)) {
-            throw ST7789Exception::invalidRegisterValue($field, $value, 0, 0x7F);
+            throw ST77xxException::invalidRegisterValue($field, $value, 0, 0x7F);
         }
     }
 
     private function assertNibble(int $value, string $field): void
     {
         if (($value < 0) || ($value > 0x0F)) {
-            throw ST7789Exception::invalidRegisterValue($field, $value, 0, 0x0F);
+            throw ST77xxException::invalidRegisterValue($field, $value, 0, 0x0F);
         }
     }
 
