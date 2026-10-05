@@ -12,7 +12,7 @@ use GeneralPurposeIO\Contracts\IntegratedCircuits\CircuitException;
 use GeneralPurposeIO\Contracts\IntegratedCircuits\DisplayPanel;
 use Surface\Contracts\Framebuffers\BitDepth;
 use Surface\Contracts\Framebuffers\Endianness;
-use Surface\Contracts\Framebuffers\FormatSpecification;
+use Surface\Contracts\Framebuffers\FormatSpec;
 use Surface\Contracts\Framebuffers\PixelFormat;
 use Surface\Contracts\Framebuffers\ScanDirection;
 
@@ -28,7 +28,7 @@ it('is a display panel with a format spec, sized by its configuration', function
     [$panel, $spi] = st7789(new ST7789Configuration(width: 320, height: 240), boot: false);
 
     expect($panel)->toBeInstanceOf(DisplayPanel::class)
-        ->and($panel)->toBeInstanceOf(FormatSpecification::class)
+        ->and($panel->formatSpec())->toBeInstanceOf(FormatSpec::class)
         ->and($panel->hasBooted())->toBeFalse()
         ->and([$panel->width(), $panel->height()])->toBe([320, 240])
         ->and($spi->writes)->toBe([]);
@@ -146,5 +146,5 @@ it('releases DC and RST on close', function (): void {
 
     $panel->close();
 
-    expect($dc->closed)->toBeTrue()->and($rst->closed)->toBeTrue();
+    expect($dc->closed())->toBeTrue()->and($rst->closed())->toBeTrue();
 });

@@ -58,5 +58,36 @@ it('releases DC and RST on close', function (): void {
 
     $transport->close();
 
-    expect($dc->closed)->toBeTrue()->and($rst->closed)->toBeTrue();
+    expect($dc->closed())->toBeTrue()->and($rst->closed())->toBeTrue();
 });
+
+it('throws when the bus refuses a command or data write', function (): void {
+    [$transport, $spi] = st77xxWire();
+    $spi->answer = -1;
+
+    expect(fn () => $transport->command(0x2A, [0, 0, 0, 0xEF]))->toThrow(\DeptOfScrapyardRobotics\Displays\ST77xx\ST77xxException::class, 'ST77xx SPI command 0x2A write failed: -1 of 1 bytes')
+        ->and(fn () => $transport->data("\x01\x02\x03"))->toThrow(\DeptOfScrapyardRobotics\Displays\ST77xx\ST77xxException::class, 'ST77xx SPI data write failed: -1 of 3 bytes');
+});
+
+it('throws when the bus writes fewer bytes than asked', function (): void {
+    [$transport, $spi] = st77xxWire();
+    $spi->answer = 2;
+
+    expect(fn () => $transport->data([1, 2, 3]))->toThrow(\DeptOfScrapyardRobotics\Displays\ST77xx\ST77xxException::class, 'write failed: 2 of 3 bytes');
+});
+
+it('refuses a packet size below 1', function (): void {
+    [$transport] = st77xxWire();
+
+    expect(fn () => $transport->maxPacketSize(0))->toThrow(\DeptOfScrapyardRobotics\Displays\ST77xx\ST77xxException::class, 'max_packet_size 0 must be at least 1');
+});
+
+it('refuses a gamma or output-adjust byte out of range instead of masking it', function (callable $build, string $message): void {
+    expect($build)->toThrow(\DeptOfScrapyardRobotics\Displays\ST77xx\ST77xxException::class, $message);
+})->with([
+    'ST7789 gamma' => [fn () => new \DeptOfScrapyardRobotics\Displays\ST77xx\ST7789\Breakouts\ST7789GammaPositive(v1: 0x100), 'Valid v1 values are between 0 and 255, you input 256.'],
+    'ST7789 negative gamma' => [fn () => new \DeptOfScrapyardRobotics\Displays\ST77xx\ST7789\Breakouts\ST7789GammaNegative(v62: -1), 'Valid v62 values are between 0 and 255'],
+    'ST7796 gamma' => [fn () => \DeptOfScrapyardRobotics\Displays\ST77xx\ST7796\Breakouts\ST7796GammaPositive::fromBytes(array_fill(0, 14, 0x1FF)), 'between 0 and 255, you input 511'],
+    'ST7796 output adjust' => [fn () => new \DeptOfScrapyardRobotics\Displays\ST77xx\ST7796\Breakouts\ST7796DisplayOutputCtrlAdjust(adjustment_3: 300), 'Valid adjustment_3 values'],
+    'ST7735 gamma (6-bit)' => [fn () => new \DeptOfScrapyardRobotics\Displays\ST77xx\ST7735\Breakouts\ST7735GammaPositive(pk0: 0x40), 'Valid pk0 values are between 0 and 63, you input 64.'],
+]);

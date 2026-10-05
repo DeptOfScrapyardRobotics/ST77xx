@@ -4,7 +4,7 @@ title: Controllers — boot and configuration
 description: Per-controller boot sequences as sent, configuration fields and defaults for ST7735, ST7789 and ST7796.
 tags: [st7735, st7789, st7796, boot, configuration]
 status: draft
-generated: { by: claude-opus-5/claude-code, at: "2026-09-16T00:00:00Z" }
+generated: { by: claude-opus/5.5, at: 2026-10-04T22:30:00Z }
 sources:
   - id: st7735-boot
     resource: src/ST7735/Concerns/ST7735Bootstrap.php
@@ -40,7 +40,7 @@ Config: `width` 480, `height` 320, `max_packet_size` 4092, offsets 0, `mad_ctrl`
 
 # All three
 
-Internal keys: `display_on`, `sleep_mode_on`. Null register args → breakout defaults in config ctor.
+Internal keys: `display_on`, `sleep_mode_on`. Null register args → breakout defaults in config ctor. Width, height, offsets follow later `mad_ctrl` writes ([settings](/settings.md#orientation)).
 
 # Related
 

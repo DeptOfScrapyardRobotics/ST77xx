@@ -2,6 +2,7 @@
 
 namespace DeptOfScrapyardRobotics\Displays\ST77xx\ST7789\Breakouts;
 
+use DeptOfScrapyardRobotics\Displays\ST77xx\ST77xxException;
 /**
  * PVGAMCTRL (0xE0) — positive-polarity gamma correction.
  *
@@ -26,7 +27,13 @@ readonly class ST7789GammaPositive
         public int $v59 = 0x0B,
         public int $v61 = 0x1F,
         public int $v62 = 0x23,
-    ) {}
+    ) {
+        foreach (get_object_vars($this) as $field => $value) {
+            if (($value < 0) || ($value > 0xFF)) {
+                throw ST77xxException::invalidRegisterValue($field, $value, 0, 0xFF);
+            }
+        }
+    }
 
     /**
      * @return list<int> The 14 parameter bytes in datasheet order.
@@ -59,9 +66,6 @@ readonly class ST7789GammaPositive
      */
     public static function fromBytes(array $bytes): static
     {
-        return new static(...array_map(
-            static fn (int $value): int => $value & 0xFF,
-            array_values($bytes)
-        ));
+        return new static(...array_values($bytes));
     }
 }

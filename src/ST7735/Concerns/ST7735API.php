@@ -159,6 +159,7 @@ trait ST7735API
     public function setMADControl(ST7735MADControl $control): void
     {
         $this->sendCommand(ST7735OpCode::MEMORY_ACCESS_CONTROL, [$control->toByte()]);
+        $this->reorient($this->config()->get('mad_ctrl'), $control);
         $this->config()->set('mad_ctrl', $control);
     }
 

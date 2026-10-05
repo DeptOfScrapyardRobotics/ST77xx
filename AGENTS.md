@@ -2,34 +2,35 @@
 
 ## Knowledge Bundle (OKF)
 
-This package ships an Open Knowledge Format bundle at [`.okf/`](.okf/) (excluded from the Composer dist via `.gitattributes` `export-ignore`). Before changing code or advising on this package: read [`.okf/index.md`](.okf/index.md) first, open only the concepts the task needs, prefer `status: stable` over `draft`. When you learn something durable, update the affected concept(s) and append [`.okf/log.md`](.okf/log.md); new or changed concepts stay `status: draft` until a human verifies them.
+This package ships an Open Knowledge Format bundle at [`.okf/`](.okf/) (excluded from the Composer dist via `.gitattributes` `export-ignore`). Before changing code or advising on this package: read [`.okf/index.md`](.okf/index.md) first, open only the concepts the task needs, prefer `status: stable` over `draft`. When you learn something durable, update the affected concept(s), bump `generated.at`, and append [`.okf/log.md`](.okf/log.md); new or changed concepts stay `status: draft` until a human verifies them. The bundle documents the package, never a session.
 
-Do **not** create `.okf` folders under `src/*` — knowledge for this package lives at the package root only. Transport, dock and framebuffer semantics belong to `scrapyard-io/framework` and `venusian/surface`; point there, do not restate them here.
+Do **not** create `.okf` folders under `src/*` — knowledge for this package lives at the package root only. Catalog, transport and adapter semantics belong to `scrapyard-io/framework`'s bundle, framebuffer packing to Surface's; point there, do not restate them here.
 
 ## Where this package sits
 
-`ext-posi` / `ext-ftdi` → `microscrap/*` → `scrapyard-io/framework` (protocol managers, transports) → **`dept-of-scrapyard-robotics/st77xx`** (ST7735 / ST7789 / ST7796 panel drivers) → Surface CPU engines, which pack frames against each panel's `FormatSpec`.
+`ext-posi` / `ext-ftdi` → `microscrap/*` → `scrapyard-io/framework` (protocol managers, transports, the circuit catalog, `DisplayPanel`) → **`dept-of-scrapyard-robotics/st77xx`** (panel drivers) → apps and Surface.
 
-## Package rules (quick) — 0.8.x
+## Package rules (quick) — 0.10.x
 
-- Composer: `dept-of-scrapyard-robotics/st77xx` **0.8.0**. PHP `^8.4|^8.5|^8.6`. One namespace, `DeptOfScrapyardRobotics\Displays\ST77xx\` → `src/`.
-- **Requires split components only**: `gpio/contracts`, `gpio/integrated-circuits`, `gpio/nuts-and-bolts`, `surface/contracts`, `venusian-voyager/nuts-and-bolts`. Never `scrapyard-io/framework`, `venusian/framework` or `venusian/surface`. Protocol components and adapters are `suggest`.
-- **Three chips, one shape.** Each of `ST7735/`, `ST7789/`, `ST7796/` has a panel class (`Bootable` + `DisplayPanel` + `FormatSpecification`), a `*Configuration`, `Concerns/*API` (setters) and `Concerns/*Bootstrap` (`__get`/`__set`, `_boot`). A fix to one chip's shape is a fix to all three.
-- **The configuration is the state.** Every setter writes the chip, then the configuration. `__get` reads any configuration key; `__set` accepts only keys with a setter. Nothing reads `$this->` settings or writes them directly.
-- **The panel owns no pixels.** `formatSpec()` is row-major, big-endian, at the colour mode's depth, rebuilt by `setPixelFormat()`. `transmit()` takes bytes already packed; `fill(r, g, b)` is the only drawing the package does, and it packs from the current `formatSpec()`.
-- **No colour depth is favoured.** 12-, 16- and 18-bit modes switch at any time through `setPixelFormat()` / `color_mode`; anything that produces pixel bytes must read the current `FormatSpec`, never assume RGB565.
-- **Boot sequences are pinned** in tests to the datasheet / Adafruit init bytes. Changing a breakout default changes those bytes; update the test only with a reason.
-- **Transport**: `ST77xxSPITransport` — register with DC low, parameters and data with DC high, chunked by `max_packet_size`; `reset()` pulses RST; `close()` releases DC and RST only.
-- **Register breakouts** are `readonly` `DataRegister`s from `gpio/integrated-circuits`; register-range errors are `ST77xxException::invalidRegisterValue()`.
-- **Reach the framework through MagicAliases** (`SPI::`, `DigitalIO::`), never `app('gpio.*')`.
-- **Config** merges under `circuits.st7735` / `circuits.st7789` / `circuits.st7796`; publish tag `st77xx-config` → `config/circuits/*.php`. The package reads none of it.
+- Composer: `dept-of-scrapyard-robotics/st77xx` **0.10.0**. PHP `^8.4|^8.5|^8.6`. Namespace `DeptOfScrapyardRobotics\Displays\ST77xx\` → `src/`.
+- **Requires split components only**: `gpio/contracts`, `gpio/integrated-circuits`, `gpio/nuts-and-bolts`, `venusian-surface/contracts`, `venusian-voyager/nuts-and-bolts`, `venusian-voyager/vessel`. Never `scrapyard-io/framework`, `venusian/surface` or `venusian/framework`. Protocol components and adapters are `suggest`; requires follow imports (and helper functions such as `byte2bits()`).
+- **Three controllers, one shape.** `ST7735/`, `ST7789/`, `ST7796/` each have the panel, `{Chip}Configuration`, `Concerns\{Chip}API` (setters: chip, then configuration), `Concerns\{Chip}Bootstrap` (`__get` any key, `__set` keys with setters, `_boot()`), `Breakouts\*`, `Enums\*`. A change to a shared behaviour lands in all three, tests included.
+- **Panel = `Bootable` + `DisplayPanel` + `WindowAddressable` + `Switchable`.** Not `RefreshesOnCommand`: TFTs show on write. `formatSpec()` is `ROW_MAJOR` / colour-mode depth / `Endianness::MSB`, rebuilt by `setPixelFormat()`. Surface 0.10 has no `FormatSpecification` interface; keep the three `formatSpec` methods as plain methods.
+- **The factory is the config shape.** `ConjuresOverSPI::spi()` parameters are exactly a `circuits.<chip>.configs.*` entry's keys; the provider catalogs `st7735`, `st7789`, `st7796`. A new config key = a new factory parameter, and the reverse. Bus first, DC and RST after. `speed` always reaches the chip select through the transport's `speed()`; a shared bus in another mode is refused.
+- **Orientation moves geometry.** `setMADControl()` calls `ST77xxOrientation::reorient()` before storing: width, height and offsets follow MX / MY / MV against `ramGeometry()` (ST7735 132×162, ST7789 240×320, ST7796 320×480). Constructor arguments describe one orientation together and are never reoriented.
+- **Every write is checked.** `ST77xxSPITransport` compares each write's result with the bytes sent and throws `spiWriteFailed`; never return or swallow `-1`.
+- **Register breakouts** are `readonly` classes (`DataRegister`s with `toBits` / `fromByte` / `none`, or multi-byte ones with `toBytes` / `fromBytes`). Integer fields are range-checked in the constructor through `invalidRegisterValue`, never masked; enum and bool fields carry their own range.
+- **Reach the framework through the container.** 0.10 has no protocol aliases or facades. The factory resolves `gpio.spi` / `gpio.digital` from `ControlPanel::getInstance()`; apps call `app('circuit')->conjure()`.
+- **Config** merges under `circuits.st7735` / `st7789` / `st7796`; publish tag `st77xx-config` → `config/circuits/*.php`. Package defaults are `driver => 'none'`.
 - **Exceptions** descend from `GeneralPurposeIO\Contracts\IntegratedCircuits\CircuitException` → `GPIOLevelException`.
-- Enums int- or string-backed, FULLY UPPERCASE cases. No class constants. `is_null($x)` over `$x === null`.
+- Enums int-backed, FULLY UPPERCASE cases. No class constants. `is_null($x)` over `$x === null`.
 
 ## Verification
 
 ```bash
-vendor/bin/pest            # recording fakes; no hardware
+vendor/bin/pest            # recording fake buses and pins; no hardware
 ```
 
-Hardware truth is a 240×320 ST7789 on an FT232H (MPSSE SPI, DC on GPIOL1, RST on GPIOL2). Announce with `say` before any run that lights a panel.
+Run it under NTS and ZTS PHP before every commit. Suites stay hardware-free: panels are for scratch smoke scripts, never committed and never in `tests/`. `.okf/runbooks/hardware-smoke.md` has the script's shape.
+
+Hardware truth: a 480×320 ST7796 on a Raspberry Pi 5's spidev0.0 with DC on GPIO22 and RST on GPIO24, and a 240×320 ST7789 on an FT232H over SPI with chip select on GPIO0 (D4), DC on GPIO1 (D5), RST on GPIO2 (D6). A frame is proven only when someone watched the panel show it.

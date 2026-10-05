@@ -2,6 +2,7 @@
 
 namespace DeptOfScrapyardRobotics\Displays\ST77xx\ST7735\Breakouts;
 
+use DeptOfScrapyardRobotics\Displays\ST77xx\ST77xxException;
 /**
  * GMCTRP1 (0xE0) — positive-polarity gamma correction.
  * 16 parameter bytes, each a 6-bit value in bits [5:0] (top 2 bits unused).
@@ -26,10 +27,16 @@ readonly class ST7735GammaPositive
         public int $selv1 = 0x01,
         public int $selv62 = 0x03,
         public int $selv63 = 0x10,
-    ) {}
+    ) {
+        foreach (get_object_vars($this) as $field => $value) {
+            if (($value < 0) || ($value > 0x3F)) {
+                throw ST77xxException::invalidRegisterValue($field, $value, 0, 0x3F);
+            }
+        }
+    }
 
     /**
-     * @return list<int> The 16 parameter bytes, each masked to its 6-bit field.
+     * @return list<int> The 16 parameter bytes, each a 6-bit field.
      */
     public function toBytes(): array
     {
@@ -61,9 +68,6 @@ readonly class ST7735GammaPositive
      */
     public static function fromBytes(array $bytes): static
     {
-        return new static(...array_map(
-            static fn (int $value): int => $value & 0x3F,
-            array_values($bytes)
-        ));
+        return new static(...array_values($bytes));
     }
 }

@@ -67,6 +67,7 @@ trait ST7789API
     public function setMADControl(ST7789MADControl $control): void
     {
         $this->sendCommand(ST7789OpCode::MEMORY_ACCESS_CONTROL, [$control->toByte()]);
+        $this->reorient($this->config()->get('mad_ctrl'), $control);
         $this->config()->set('mad_ctrl', $control);
     }
 

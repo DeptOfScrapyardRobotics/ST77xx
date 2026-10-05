@@ -1,10 +1,10 @@
 ---
 type: Reference
 title: Panel settings
-description: Property reads and writes on ST77xx panels, the setters behind them, and orientation through MADCTL.
+description: Property reads and writes on ST77xx panels, the setters behind them, and orientation through MADCTL with size and offsets following.
 tags: [settings, properties, madctl, orientation]
 status: draft
-generated: { by: claude-opus-5/claude-code, at: "2026-09-16T00:00:00Z" }
+generated: { by: claude-opus/5.5, at: 2026-10-04T22:30:00Z }
 sources:
   - id: bootstrap
     resource: src/ST7789/Concerns/ST7789Bootstrap.php
@@ -12,23 +12,44 @@ sources:
   - id: mad
     resource: src/ST7789/Breakouts/ST7789MADControl.php
     title: ST7789MADControl
+  - id: orientation
+    resource: src/Concerns/ST77xxOrientation.php
+    title: ST77xxOrientation
+  - id: tests
+    resource: tests/OrientationTest.php
+    title: orientation tests
 ---
 
 # Properties
 
 Read: any configuration key (`$panel->width`, `$panel->gamma_positive`, …).[^bootstrap]
 
-Write (all chips): `display_on` → `setDisplay`; `sleep_mode_on` → `setSleepMode`; `invert_display` → `setDisplayInversion`; `mad_ctrl` → `setMADControl`; `color_mode` → `setPixelFormat`. Plus each chip's register keys → their setters (see [controllers](/controllers.md)). Size, offsets, packet size → `invalidProperty`.
+Write (all chips): `display_on` → `setDisplay`; `sleep_mode_on` → `setSleepMode`; `invert_display` → `setDisplayInversion`; `mad_ctrl` → `setMADControl`; `color_mode` → `setPixelFormat`. Plus each chip's register keys → their setters (see [controllers](/controllers.md)). Size, offsets, packet size → `invalidProperty`: size and offsets follow `mad_ctrl`.
 
 State lives in configuration; driver never reads controller.
 
 # MADCTL
 
-`{Chip}MADControl(bottom_top_row_addresses, right_left_column_addresses, pixel_direction_vertical, bottom_top_refresh, bgr_order_mode, right_left_refresh)` → bits 7..2.[^mad] MV (`pixel_direction_vertical`) swaps axes; MY/MX mirror; bit 3 BGR.
+`{Chip}MADControl(bottom_top_row_addresses, right_left_column_addresses, pixel_direction_vertical, bottom_top_refresh, bgr_order_mode, right_left_refresh)` → bits 7..2 = MY, MX, MV, ML, BGR, MH.[^mad]
+
+# Orientation
+
+Configured `width`, `height`, `x_offset`, `y_offset` and `mad_ctrl` describe one orientation together. A later `mad_ctrl` write moves all four:[^orientation] MX mirrors the column address, MY the row address, then MV exchanges them. Window at RAM column c0 (pw wide), row r0 (ph tall), RAM ram_cols × ram_rows:
+
+| | x | width | y | height |
+|---|---|---|---|---|
+| MV off | MX ? ram_cols − pw − c0 : c0 | pw | MY ? ram_rows − ph − r0 : r0 | ph |
+| MV on | MX ? ram_rows − ph − r0 : r0 | ph | MY ? ram_cols − pw − c0 : c0 | pw |
+
+RAM: ST7735 132×162, ST7789 240×320, ST7796 320×480. Panel filling RAM → offsets stay 0. Checked against Adafruit's 135×240 ST7789 rotations: (52, 40), (40, 52), (53, 40), (40, 53).[^tests]
+
+Quarter turn: toggle MV and MX together. Live: ST7789 240×320 → 320×240 and ST7796 480×320 → 320×480, pattern's top-left marker in the new top-left on both.
 
 # Related
 
-* [traps/madctl-swaps-size](/traps/madctl-swaps-size.md) · [drawing](/drawing.md)
+* [drawing](/drawing.md) · [controllers](/controllers.md)
 
 [^bootstrap]: __get / __set
 [^mad]: ST7789MADControl
+[^orientation]: ST77xxOrientation
+[^tests]: orientation tests

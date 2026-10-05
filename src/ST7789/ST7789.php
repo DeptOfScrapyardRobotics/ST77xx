@@ -5,21 +5,29 @@ namespace DeptOfScrapyardRobotics\Displays\ST77xx\ST7789;
 use DeptOfScrapyardRobotics\Displays\ST77xx\ST7789\Concerns\ST7789Bootstrap;
 use DeptOfScrapyardRobotics\Displays\ST77xx\ST7789\Enums\ST7789ColorMode;
 use DeptOfScrapyardRobotics\Displays\ST77xx\ST7789\Enums\ST7789OpCode;
+use DeptOfScrapyardRobotics\Displays\ST77xx\Concerns\ConjuresOverSPI;
+use DeptOfScrapyardRobotics\Displays\ST77xx\Concerns\ST77xxOrientation;
+use DeptOfScrapyardRobotics\Displays\ST77xx\Concerns\ST77xxPipes;
+use DeptOfScrapyardRobotics\Displays\ST77xx\ST7789\Breakouts\ST7789MADControl;
 use DeptOfScrapyardRobotics\Displays\ST77xx\ST77xxFills;
 use DeptOfScrapyardRobotics\Displays\ST77xx\Transports\ST77xxDataTransport;
 use GeneralPurposeIO\IntegratedCircuits\Bootable;
 use Surface\Contracts\Framebuffers\BitDepth;
 use Surface\Contracts\Framebuffers\Endianness;
 use Surface\Contracts\Framebuffers\FormatSpec;
-use Surface\Contracts\Framebuffers\FormatSpecification;
 use GeneralPurposeIO\Contracts\IntegratedCircuits\DisplayPanel;
+use GeneralPurposeIO\Contracts\IntegratedCircuits\Switchable;
+use GeneralPurposeIO\Contracts\IntegratedCircuits\PipeablePanel;
 use Surface\Contracts\Framebuffers\PixelFormat;
 use Surface\Contracts\Framebuffers\ScanDirection;
 
-class ST7789 extends Bootable implements DisplayPanel, FormatSpecification
+class ST7789 extends Bootable implements DisplayPanel, PipeablePanel, Switchable
 {
     use ST7789Bootstrap;
     use ST77xxFills;
+    use ConjuresOverSPI;
+    use ST77xxOrientation;
+    use ST77xxPipes;
 
     protected FormatSpec $format_spec;
 
@@ -31,6 +39,21 @@ class ST7789 extends Bootable implements DisplayPanel, FormatSpecification
         $this->format_spec = $this->generateFormatSpec();
 
         parent::__construct($boot_now);
+    }
+
+    protected static function configurationClass(): string
+    {
+        return ST7789Configuration::class;
+    }
+
+    protected static function ramGeometry(): array
+    {
+        return [240, 320];
+    }
+
+    protected static function madControlClass(): string
+    {
+        return ST7789MADControl::class;
     }
 
     public function width(): int

@@ -2,25 +2,25 @@
 okf_version: "0.2"
 ---
 
-# dept-of-scrapyard-robotics/st77xx — knowledge bundle
+# dept-of-scrapyard-robotics/st77xx
 
-ST7735, ST7789 and ST7796 colour TFT drivers for `scrapyard-io/framework` 0.8. SPI + DC/RST, datasheet boot from per-chip configuration objects, row-major `FormatSpec`, windowed RAM writes, fill in any colour mode.
+ST7735, ST7789 and ST7796 colour TFT drivers for `scrapyard-io/framework` 0.10. SPI + DC/RST, conjured from config, datasheet boot from per-chip configuration objects, checked writes, row-major `FormatSpec`, windowed RAM writes, rotation that carries size and offsets, fill in any colour mode.
 
 Read this index first, open only concepts task needs. Every concept `status: draft` until human verifies.
 
 # Concepts
 
-* [overview.md](/overview.md) - package identity, requires, class shape shared by the three chips, errors
-* [connecting.md](/connecting.md) - ST77xxSPITransport, DC/RST, FT232H and spidev wiring
-* [controllers.md](/controllers.md) - per-chip boot sequence, configuration fields, defaults
-* [drawing.md](/drawing.md) - FormatSpec, packing, transmit() windows, offsets, mode-neutral fill(), colour-mode switching, timings
-* [settings.md](/settings.md) - properties, setters, state in configuration, orientation
-* [wiring-config.md](/wiring-config.md) - circuits.st77xx keys, publish tag
+* [Package](overview.md) - ST7735, ST7789 and ST7796 TFT drivers for scrapyard-io/framework 0.10 — identity, requires, shared class shape, errors.
+* [Connecting](connecting.md) - conjure() and the spi() factory, SPI mode and clock, sharing a bus, DC and RST, building the transport by hand.
+* [Controllers](controllers.md) - Per-controller boot sequences as sent, configuration fields and defaults.
+* [Drawing](drawing.md) - FormatSpec, packing with a Surface framebuffer, transmit() windows, fill(), colour modes, live timings.
+* [Settings](settings.md) - Properties and setters, MADCTL, orientation with size and offsets following.
+* [Wiring config](wiring-config.md) - circuits.st7735 / st7789 / st7796 keys, how conjure() reads them, publish tag.
 
-# Traps
+# Runbooks
 
-* [traps/](/traps/index.md) - MPSSE speed via clockRate, MADCTL swaps width/height, unchecked writes
+* [Hardware smoke](runbooks/hardware-smoke.md) - Pi 5 ST7796 on spidev, FT232H ST7789 over MPSSE, scratch script booted through the real providers.
 
 # Log
 
-* [log.md](/log.md)
+* [log.md](log.md)

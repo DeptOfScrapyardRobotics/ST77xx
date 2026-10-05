@@ -2,6 +2,7 @@
 
 namespace DeptOfScrapyardRobotics\Displays\ST77xx\ST7796\Breakouts;
 
+use DeptOfScrapyardRobotics\Displays\ST77xx\ST77xxException;
 /**
  * DOCA (0xE8) — display output ctrl adjust.
  *
@@ -20,7 +21,13 @@ readonly class ST7796DisplayOutputCtrlAdjust
         public int $adjustment_6 = 0x19,
         public int $adjustment_7 = 0xA5,
         public int $adjustment_8 = 0x33,
-    ) {}
+    ) {
+        foreach (get_object_vars($this) as $field => $value) {
+            if (($value < 0) || ($value > 0xFF)) {
+                throw ST77xxException::invalidRegisterValue($field, $value, 0, 0xFF);
+            }
+        }
+    }
 
     /**
      * @return list<int> The 8 parameter bytes in datasheet order.
@@ -47,9 +54,6 @@ readonly class ST7796DisplayOutputCtrlAdjust
      */
     public static function fromBytes(array $bytes): static
     {
-        return new static(...array_map(
-            static fn (int $value): int => $value & 0xFF,
-            array_values($bytes)
-        ));
+        return new static(...array_values($bytes));
     }
 }

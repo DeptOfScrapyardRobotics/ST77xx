@@ -4,28 +4,60 @@ namespace DeptOfScrapyardRobotics\Displays\ST77xx\Tests\Support;
 
 use GeneralPurposeIO\SPI\SPITransport;
 
-/** Records every write, tagged with the DC level it went out under. */
-final class FakeSPITransport extends SPITransport
+/** Records every write, tagged with the DC level it went out under once a DC pin is attached; 'raw' before. */
+class FakeSPITransport extends SPITransport
 {
-    /** @var list<array{0: string, 1: list<int>}> ['cmd'|'data', bytes] */
+    /** @var list<array{0: string, 1: list<int>}> ['cmd'|'data'|'raw', bytes] */
     public array $writes = [];
 
-    public function __construct(public readonly FakeOutputPin $dc)
+    /** Every write answers this when set, as a failed spidev ioctl answers -1. */
+    public ?int $answer = null;
+
+    public bool $released = false;
+
+    public function __construct(public ?FakeOutputPin $dc = null, int $chip_select = 0)
     {
-        parent::__construct(0);
+        parent::__construct($chip_select);
     }
 
-    public function handle(): string { return 'fake'; }
-    public function read(int $len): array|false { return false; }
-    public function transfer(array|string $data): array|false { return false; }
-    public function close(): void {}
+    public function handle(): string
+    {
+        return 'fake';
+    }
+
+    public function read(int $len): array|false
+    {
+        return false;
+    }
+
+    public function transfer(array|string $data): array|false
+    {
+        return false;
+    }
+
+    public function writeRead(array|string $bytes_to_write, int $bytes_to_read): array|false
+    {
+        return false;
+    }
 
     public function write(array|string $data): int
     {
         $bytes = is_array($data) ? array_values($data) : array_values(unpack('C*', $data));
-        $this->writes[] = [$this->dc->state ? 'data' : 'cmd', $bytes];
+        $this->writes[] = [is_null($this->dc) ? 'raw' : ($this->dc->state ? 'data' : 'cmd'), $bytes];
 
-        return count($bytes);
+        return $this->answer ?? count($bytes);
+    }
+
+    public function speed(int $hz): static
+    {
+        $this->hz = $hz;
+
+        return $this;
+    }
+
+    public function clock(): ?int
+    {
+        return $this->hz;
     }
 
     /**
@@ -51,5 +83,14 @@ final class FakeSPITransport extends SPITransport
         }
 
         return $out;
+    }
+
+    protected function beginSelection(): void {}
+
+    protected function endSelection(): void {}
+
+    protected function release(): void
+    {
+        $this->released = true;
     }
 }

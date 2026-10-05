@@ -4,21 +4,29 @@ namespace DeptOfScrapyardRobotics\Displays\ST77xx\ST7796;
 
 use DeptOfScrapyardRobotics\Displays\ST77xx\ST7796\Concerns\ST7796Bootstrap;
 use DeptOfScrapyardRobotics\Displays\ST77xx\ST7796\Enums\ST7796OpCode;
+use DeptOfScrapyardRobotics\Displays\ST77xx\Concerns\ConjuresOverSPI;
+use DeptOfScrapyardRobotics\Displays\ST77xx\Concerns\ST77xxOrientation;
+use DeptOfScrapyardRobotics\Displays\ST77xx\Concerns\ST77xxPipes;
+use DeptOfScrapyardRobotics\Displays\ST77xx\ST7796\Breakouts\ST7796MADControl;
 use DeptOfScrapyardRobotics\Displays\ST77xx\ST77xxFills;
 use DeptOfScrapyardRobotics\Displays\ST77xx\Transports\ST77xxDataTransport;
 use GeneralPurposeIO\IntegratedCircuits\Bootable;
 use Surface\Contracts\Framebuffers\BitDepth;
 use Surface\Contracts\Framebuffers\Endianness;
 use Surface\Contracts\Framebuffers\FormatSpec;
-use Surface\Contracts\Framebuffers\FormatSpecification;
 use Surface\Contracts\Framebuffers\PixelFormat;
 use Surface\Contracts\Framebuffers\ScanDirection;
 use GeneralPurposeIO\Contracts\IntegratedCircuits\DisplayPanel;
+use GeneralPurposeIO\Contracts\IntegratedCircuits\Switchable;
+use GeneralPurposeIO\Contracts\IntegratedCircuits\PipeablePanel;
 
-class ST7796 extends Bootable implements DisplayPanel, FormatSpecification
+class ST7796 extends Bootable implements DisplayPanel, PipeablePanel, Switchable
 {
     use ST7796Bootstrap;
     use ST77xxFills;
+    use ConjuresOverSPI;
+    use ST77xxOrientation;
+    use ST77xxPipes;
 
     protected FormatSpec $format_spec;
 
@@ -30,6 +38,21 @@ class ST7796 extends Bootable implements DisplayPanel, FormatSpecification
         $this->format_spec = $this->generateFormatSpec();
 
         parent::__construct($boot_now);
+    }
+
+    protected static function configurationClass(): string
+    {
+        return ST7796Configuration::class;
+    }
+
+    protected static function ramGeometry(): array
+    {
+        return [320, 480];
+    }
+
+    protected static function madControlClass(): string
+    {
+        return ST7796MADControl::class;
     }
 
     public function width(): int
